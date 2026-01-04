@@ -24,19 +24,61 @@ export default function ReverseEngineering() {
         camera_settings?: CameraSettings;
     } | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const compressImage = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                img.src = e.target?.result as string;
+            };
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const maxDim = 1536; // Resize to max 1536px to stay under Vercel 4.5MB limit
+
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) {
+                        height = (height * maxDim) / width;
+                        width = maxDim;
+                    } else {
+                        width = (width * maxDim) / height;
+                        height = maxDim;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx?.drawImage(img, 0, 0, width, height);
+
+                // Compress to JPEG 0.8
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                resolve(dataUrl.split(',')[1]); // Return base64 only
+            };
+
+            reader.onerror = (error) => reject(error);
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setSelectedImage(URL.createObjectURL(file));
-            setFileType(file.type);
 
-            // Convert to Base64
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result?.toString().split(',')[1];
-                if (base64String) setImageBase64(base64String);
-            };
-            reader.readAsDataURL(file);
+            // Force mimeType to jpeg after compression
+            setFileType('image/jpeg');
+
+            try {
+                const compressedBase64 = await compressImage(file);
+                setImageBase64(compressedBase64);
+            } catch (error) {
+                console.error("Compression failed", error);
+                alert("Image processing failed. Please try another image.");
+            }
         }
     };
 
