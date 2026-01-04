@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       4. **Environment & Foreground**: Specific materials (e.g., "red brick patio", "wooden framed windows"), foreground elements (e.g., "blurred green leaves in foreground"), background depth.
       5. **Lighting & Atmosphere**: "Cinematic lighting", "Tyndall effect", "soft natural light", shadows.
       6. **Technical**: "Bokeh", "Depth of field", estimated lens (e.g., "35mm", "85mm"), film grain if any.
+      7. **Style & Artistic Direction**: Explicitly identify the art style (e.g., "Photorealistic", "Anime/Manga", "Impressionist", "Ukiyo-e", "Cyberpunk", "Oil Painting"). If it's a specific artist's style (e.g., "Makoto Shinkai", "Van Gogh"), mention it.
 
       Format the output as a seamless, high-quality prompt paragraph (not a list).
 
